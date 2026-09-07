@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# YOLO training outputs
+runs/
+wandb/
+
+# Datasets
+dataset/
+datasets/
+train/
+valid/
+test/
+
+# Environment/secrets
+.env
+
+# VS Code
+.vscode/
+
+# Temporary files
+*.log
+*.tmp
