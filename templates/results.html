@@ -1,0 +1,636 @@
+
+raw
+Results · HTML
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Results</title>
+  <meta name="description" content="View your bone fracture detection results from OsteoScan AI."/>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+ 
+  <style>
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px;
+    }
+ 
+    /* ── Top Bar ── */
+    .page-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 20px; gap: 12px;
+      background: #111416; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 4px;
+      text-decoration: none; color: #bacac5;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 10px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: color .2s, border-color .2s;
+    }
+    .back-btn:hover { color: #57f1db; border-color: rgba(87,241,219,0.3); }
+    .back-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .page-brand { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 17px; color: #57f1db; letter-spacing: -0.4px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .new-scan-btn {
+      display: flex; align-items: center; gap: 5px;
+      text-decoration: none; font-size: 12px; font-weight: 600;
+      padding: 6px 12px; border-radius: 8px;
+      border: 1px solid rgba(87,241,219,0.3); color: #57f1db;
+      background: rgba(87,241,219,0.06); transition: background .2s;
+    }
+    .new-scan-btn:hover { background: rgba(87,241,219,0.1); }
+    .new-scan-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 15px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .logout-btn {
+      background: none; border: 1px solid #ef4444; color: #ef4444;
+      padding: 4px 11px; border-radius: 20px; font-size: 11px;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: background .2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+ 
+    /* ── Main ── */
+    .page-main {
+      padding: 80px 20px 24px; max-width: 900px;
+      margin: 0 auto; display: flex; flex-direction: column; gap: 20px;
+    }
+ 
+    /* ── Page Title ── */
+    .results-title {
+      font-family: 'Manrope', sans-serif; font-weight: 800;
+      font-size: clamp(24px, 5vw, 32px); letter-spacing: -0.5px;
+    }
+    .results-title em { color: #57f1db; font-style: normal; }
+ 
+    /* ── No Fracture ── */
+    .no-fracture-card {
+      background: #1e2022; border: 1px solid rgba(87,241,219,0.15);
+      border-radius: 16px; padding: 52px 24px; text-align: center;
+    }
+    .no-fracture-icon { font-size: 52px; margin-bottom: 16px; }
+    .no-fracture-card h2 {
+      font-family: 'Manrope', sans-serif; font-weight: 700;
+      font-size: 22px; color: #57f1db; margin-bottom: 10px;
+    }
+    .no-fracture-card p { color: #bacac5; font-size: 13px; line-height: 1.7; max-width: 420px; margin: 0 auto 24px; }
+    .no-fracture-card a {
+      display: inline-block; padding: 11px 28px;
+      background: linear-gradient(135deg, #57f1db, #2dd4bf);
+      color: #003731; font-weight: 700; font-size: 13px;
+      border-radius: 10px; text-decoration: none; font-family: 'Manrope', sans-serif;
+    }
+ 
+    /* ── Results Grid ── */
+    .results-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    }
+    @media (max-width: 680px) { .results-grid { grid-template-columns: 1fr; } }
+ 
+    /* ── Result Card ── */
+    .result-card {
+      background: #1e2022; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px;
+    }
+    .result-card h2 {
+      font-family: 'Manrope', sans-serif; font-weight: 700;
+      font-size: 16px; color: #e2e2e5; margin-bottom: 14px;
+    }
+    .img-wrap {
+      border-radius: 10px; overflow: hidden; background: #000;
+      display: flex; align-items: center; justify-content: center; min-height: 180px;
+      position: relative; height: 460px; cursor: grab;
+      transition: box-shadow .25s;
+    }
+    .img-wrap.active-glow { box-shadow: 0 0 0 2px #57f1db, 0 0 20px rgba(87,241,219,0.35); }
+    .img-wrap:active { cursor: grabbing; }
+    .img-wrap img {
+      width: 100%; height: auto; display: block; max-height: 460px; object-fit: contain;
+      transform-origin: center center; transition: transform .08s ease-out;
+      pointer-events: none; user-select: none;
+    }
+ 
+    /* Zoom controls */
+    .zoom-controls {
+      position: absolute; bottom: 8px; right: 8px; z-index: 5;
+      display: flex; gap: 4px; background: rgba(17,20,22,0.75);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 3px;
+      backdrop-filter: blur(6px);
+    }
+    .zoom-btn {
+      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; color: #bacac5; cursor: pointer;
+      border-radius: 6px; transition: background .2s, color .2s;
+    }
+    .zoom-btn:hover { background: rgba(87,241,219,0.12); color: #57f1db; }
+    .zoom-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .zoom-hint {
+      position: absolute; top: 8px; left: 8px; z-index: 5;
+      font-size: 10px; color: #8b949e; background: rgba(17,20,22,0.6);
+      padding: 3px 8px; border-radius: 6px; pointer-events: none;
+      transition: opacity .3s;
+    }
+ 
+    /* Meta row */
+    .meta-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 12px; gap: 8px; flex-wrap: wrap;
+    }
+    .meta-item { font-size: 11px; color: #bacac5; font-family: 'Inter', sans-serif; }
+    .download-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: none; border: 1px solid rgba(255,255,255,0.12);
+      color: #e2e2e5; font-size: 12px; padding: 6px 12px;
+      border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: border-color .2s, color .2s;
+    }
+    .download-btn:hover { border-color: #57f1db; color: #57f1db; }
+    .download-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 14px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── Summary Card ── */
+    .summary-card {
+      padding: 16px 18px; border-radius: 12px; margin-bottom: 14px;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(255,255,255,0.02);
+    }
+    .summary-label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+    .summary-value { font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 700; }
+ 
+    /* ── Detection Cards ── */
+    .detections-list { display: flex; flex-direction: column; gap: 10px; }
+    .detection-card {
+      padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.02);
+      animation: slideUp .3s ease both;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .detection-card:hover, .detection-card.card-active {
+      border-color: rgba(87,241,219,0.35); background: rgba(87,241,219,0.05);
+    }
+    .export-pdf-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 14px; padding: 10px 12px;
+      background: linear-gradient(135deg, #57f1db, #2dd4bf);
+      color: #003731; font-weight: 700; font-size: 13px;
+      border: none; border-radius: 10px; cursor: pointer;
+      font-family: 'Manrope', sans-serif; transition: opacity .2s;
+    }
+    .export-pdf-btn:hover { opacity: .88; }
+    .export-pdf-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .export-pdf-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .skeleton-view-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 10px; padding: 10px 12px;
+      background: rgba(87,241,219,0.06);
+      border: 1px solid rgba(87,241,219,0.3);
+      color: #57f1db; font-weight: 700; font-size: 13px;
+      border-radius: 10px; cursor: pointer; text-decoration: none;
+      font-family: 'Manrope', sans-serif; transition: background .2s;
+    }
+    .skeleton-view-btn:hover { background: rgba(87,241,219,0.12); }
+    .skeleton-view-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .det-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .det-class  { font-weight: 600; font-size: 14px; }
+    .det-conf   { font-size: 12px; font-weight: 700; color: #57f1db; font-family: 'Inter', sans-serif; }
+    .det-severity {
+      display: inline-block; padding: 2px 9px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: 8px;
+    }
+    .det-info-block {
+      margin: 10px 0 8px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.025);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .det-info-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; font-size: 12px;
+      margin-bottom: 6px; gap: 12px;
+    }
+    .det-info-row:last-child { margin-bottom: 0; }
+    .det-info-lbl { color: #6b7280; white-space: nowrap; flex-shrink: 0; }
+    .det-info-val { color: #e2e2e5; font-weight: 500; text-align: right; }
+    .source-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      font-size: 10px; font-family: 'Inter', sans-serif; letter-spacing: .04em; border: 1px solid;
+    }
+    .source-roboflow-primary   { color: #57f1db; border-color: rgba(87,241,219,0.25); background: rgba(87,241,219,0.07); }
+    .source-roboflow-alternate { color: #3b9eff; border-color: rgba(59,158,255,0.25); background: rgba(59,158,255,0.07); }
+    .source-visual-morphology  { color: #f59e0b; border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.07); }
+    .det-advice { font-size: 12px; color: #bacac5; line-height: 1.6; }
+    .conf-bar-wrap { height: 4px; background: #333537; border-radius: 4px; margin-top: 10px; }
+    .conf-bar      { height: 100%; border-radius: 4px; transition: width .6s; }
+ 
+    /* Run another link */
+    .run-again {
+      display: inline-flex; align-items: center; gap: 5px;
+      margin-top: 12px; color: #57f1db; font-size: 13px;
+      text-decoration: none; font-weight: 500;
+      transition: opacity .2s;
+    }
+    .run-again:hover { opacity: .75; }
+    .run-again .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 15px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; text-decoration: none; padding: 6px 16px; border-radius: 12px;
+      transition: all .2s; color: #6b7280; border: none; background: transparent; cursor: pointer;
+    }
+    .nav-item:hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+ 
+  <!-- ── Top Bar ── -->
+  <header class="page-header">
+    <div class="header-left">
+      <a href="home.html" class="back-btn">
+        <span class="mat-icon">arrow_back</span>
+        Home
+      </a>
+      <span class="page-brand">Results</span>
+    </div>
+    <div class="header-right">
+      <a href="detect.html" class="new-scan-btn">
+        <span class="mat-icon">add</span>
+        New Scan
+      </a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+ 
+  <!-- ── Main ── -->
+  <main class="page-main">
+ 
+    <h1 class="results-title">Detection <em>Results</em></h1>
+ 
+    <!-- No Fracture State -->
+    <div class="no-fracture-card" id="noFracturePanel" style="display:none">
+      <div class="no-fracture-icon">✅</div>
+      <h2>No Fracture Detected</h2>
+      <p>The model found no fractures above the confidence threshold. Consider lowering the threshold or consulting a specialist for borderline cases.</p>
+      <a href="detect.html">← Upload another X-ray</a>
+    </div>
+ 
+    <!-- Results Grid -->
+    <div class="results-grid" id="resultsSection" style="display:none">
+ 
+      <!-- Annotated Image -->
+      <div class="result-card">
+        <h2>Annotated X-ray</h2>
+        <div class="img-wrap" id="imgWrap">
+          <img id="resultImg" alt="Annotated fracture result"/>
+          <span class="zoom-hint" id="zoomHint">Scroll or pinch to zoom · drag to pan</span>
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOutBtn" title="Zoom out"><span class="mat-icon">remove</span></button>
+            <button class="zoom-btn" id="zoomResetBtn" title="Reset"><span class="mat-icon">restart_alt</span></button>
+            <button class="zoom-btn" id="zoomInBtn" title="Zoom in"><span class="mat-icon">add</span></button>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="meta-item" id="inferenceTime">—</span>
+          <button class="download-btn" id="downloadBtn">
+            <span class="mat-icon">download</span>
+            Download
+          </button>
+        </div>
+      </div>
+ 
+      <!-- Diagnosis Report -->
+      <div class="result-card">
+        <h2>Diagnosis Report</h2>
+        <div id="summaryCard" class="summary-card"></div>
+        <div id="detectionsList" class="detections-list"></div>
+        <button class="export-pdf-btn" id="exportPdfBtn">
+          <span class="mat-icon">picture_as_pdf</span>
+          Download Full Report (PDF)
+        </button>
+        <a href="skeleton-view.html" class="skeleton-view-btn" id="skeletonViewBtn">
+          <span class="mat-icon">view_in_ar</span>
+          View in 3D Skeleton Model
+        </a>
+        <a href="detect.html" class="run-again">
+          <span class="mat-icon">arrow_back</span>
+          Run another scan
+        </a>
+      </div>
+ 
+    </div>
+ 
+  </main>
+ 
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+    function logout() { sessionStorage.removeItem('osteo_user'); window.location.href = 'login.html'; }
+ 
+    // Load result data
+    const data = JSON.parse(sessionStorage.getItem('osteo_result') || 'null');
+    if (!data) window.location.href = 'detect.html';
+ 
+    const SOURCE_LABELS = {
+      'roboflow-primary':   'API · Primary Model',
+      'roboflow-alternate': 'API · Alternate Model',
+      'visual-morphology':  'Visual Morphology',
+    };
+    const SOURCE_CLASS = {
+      'roboflow-primary':   'source-roboflow-primary',
+      'roboflow-alternate': 'source-roboflow-alternate',
+      'visual-morphology':  'source-visual-morphology',
+    };
+ 
+    if (data.no_fracture) {
+      document.getElementById('noFracturePanel').style.display = 'block';
+    } else {
+      document.getElementById('resultsSection').style.display = 'grid';
+      document.getElementById('resultImg').src = data.annotated_image;
+      document.getElementById('inferenceTime').textContent = `⏱ ${data.inference_time_ms} ms`;
+ 
+      document.getElementById('downloadBtn').onclick = () => {
+        const a = document.createElement('a');
+        a.href = data.annotated_image;
+        a.download = `fracture_result_${Date.now()}.jpg`;
+        a.click();
+      };
+ 
+      const severityColors = { Critical:'#dc2626', High:'#ef4444', Medium:'#f97316', Low:'#f59e0b', None:'#57f1db' };
+      const sColor = severityColors[data.highest_severity] || '#8b949e';
+ 
+      document.getElementById('summaryCard').innerHTML = `
+        <div class="summary-label">Overall Assessment</div>
+        <div class="summary-value" style="color:${sColor}">${data.highest_severity} Severity</div>
+        <div style="margin-top:8px;font-size:12px;color:#bacac5">
+          ${data.total_detected} fracture${data.total_detected !== 1 ? 's' : ''} detected
+        </div>
+      `;
+ 
+      const list = document.getElementById('detectionsList');
+      data.detections.forEach((det, i) => {
+        const srcKey   = det.classification_source || 'visual-morphology';
+        const srcLabel = SOURCE_LABELS[srcKey] || srcKey;
+        const srcClass = SOURCE_CLASS[srcKey]  || 'source-visual-morphology';
+ 
+        const card = document.createElement('div');
+        card.className = 'detection-card';
+        card.style.animationDelay = `${i * 0.08}s`;
+        card.innerHTML = `
+          <div class="det-header">
+            <span class="det-class">${det.class} Fracture</span>
+            <span class="det-conf">${det.confidence}%</span>
+          </div>
+          <span class="det-severity" style="background:${det.color}18;color:${det.color};border:1px solid ${det.color}33">
+            ${det.severity} Severity
+          </span>
+          <div class="det-info-block">
+            <div class="det-info-row">
+              <span class="det-info-lbl">🔬 Fracture type</span>
+              <span class="det-info-val">${det.class}${det.type_confidence ? ` <span style="color:#57f1db;font-size:10px">${det.type_confidence}%</span>` : ''}</span>
+            </div>
+            <div class="det-info-row">
+              <span class="det-info-lbl">🦴 Body part</span>
+              <span class="det-info-val">${det.body_part}</span>
+            </div>
+            <div class="det-info-row">
+              <span class="det-info-lbl">📋 Description</span>
+              <span class="det-info-val">${det.description}</span>
+            </div>
+            <div class="det-info-row">
+              <span class="det-info-lbl">🤖 Classified by</span>
+              <span class="source-badge ${srcClass}">${srcLabel}</span>
+            </div>
+          </div>
+          <p class="det-advice">${det.advice}</p>
+          <div class="conf-bar-wrap">
+            <div class="conf-bar" style="width:${det.confidence}%;background:${det.color}"></div>
+          </div>
+        `;
+ 
+        // Sync: hovering a detection card highlights the annotated image
+        // (Note: a true per-box tooltip needs bounding-box coordinates from the
+        // backend inference response — this glow is the practical version
+        // since the box is currently burned into the returned image.)
+        const imgWrap = document.getElementById('imgWrap');
+        card.addEventListener('mouseenter', () => imgWrap.classList.add('active-glow'));
+        card.addEventListener('mouseleave', () => imgWrap.classList.remove('active-glow'));
+ 
+        list.appendChild(card);
+      });
+    }
+ 
+    // ── Zoom / Pan on the annotated X-ray ──
+    (function setupZoomPan() {
+      const wrap = document.getElementById('imgWrap');
+      const img = document.getElementById('resultImg');
+      const hint = document.getElementById('zoomHint');
+      if (!wrap || !img) return;
+ 
+      let scale = 1, panX = 0, panY = 0;
+      let isDragging = false, startX = 0, startY = 0;
+      const MIN_SCALE = 1, MAX_SCALE = 4;
+ 
+      function apply() {
+        img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      }
+ 
+      function clampPan() {
+        // keep pan reasonable so image doesn't fly off-screen at low zoom
+        const maxPan = (scale - 1) * 150;
+        panX = Math.max(-maxPan, Math.min(maxPan, panX));
+        panY = Math.max(-maxPan, Math.min(maxPan, panY));
+      }
+ 
+      function zoomBy(delta) {
+        scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale + delta));
+        if (scale === 1) { panX = 0; panY = 0; }
+        clampPan();
+        apply();
+      }
+ 
+      wrap.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        zoomBy(e.deltaY < 0 ? 0.2 : -0.2);
+        if (hint) hint.style.opacity = '0';
+      }, { passive: false });
+ 
+      wrap.addEventListener('mousedown', (e) => {
+        if (scale === 1) return;
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        clampPan();
+        apply();
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+ 
+      // Touch support (pinch-free simple drag + double-tap to zoom)
+      let lastTap = 0;
+      wrap.addEventListener('touchstart', (e) => {
+        const now = Date.now();
+        if (now - lastTap < 300) { zoomBy(scale === 1 ? 1 : -(scale - 1)); }
+        lastTap = now;
+        if (scale > 1 && e.touches.length === 1) {
+          isDragging = true;
+          startX = e.touches[0].clientX - panX;
+          startY = e.touches[0].clientY - panY;
+        }
+      });
+      wrap.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        panX = e.touches[0].clientX - startX;
+        panY = e.touches[0].clientY - startY;
+        clampPan();
+        apply();
+      });
+      wrap.addEventListener('touchend', () => { isDragging = false; });
+ 
+      document.getElementById('zoomInBtn')?.addEventListener('click', () => zoomBy(0.4));
+      document.getElementById('zoomOutBtn')?.addEventListener('click', () => zoomBy(-0.4));
+      document.getElementById('zoomResetBtn')?.addEventListener('click', () => {
+        scale = 1; panX = 0; panY = 0; apply();
+      });
+ 
+      // fade the hint out after a few seconds
+      setTimeout(() => { if (hint) hint.style.opacity = '0'; }, 4000);
+    })();
+ 
+    // ── PDF export: annotated X-ray + diagnosis report in one file ──
+    document.getElementById('exportPdfBtn')?.addEventListener('click', async function () {
+      const btn = this;
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="mat-icon">hourglass_top</span> Generating…';
+ 
+      try {
+        const target = document.getElementById('resultsSection');
+ 
+        // temporarily hide interactive-only controls so they don't appear in the PDF
+        const zoomControls = target.querySelector('.zoom-controls');
+        const zoomHint = target.querySelector('.zoom-hint');
+        const exportBtn = document.getElementById('exportPdfBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const runAgain = target.querySelector('.run-again');
+        const toHide = [zoomControls, zoomHint, exportBtn, downloadBtn, runAgain];
+        toHide.forEach(el => { if (el) el.style.visibility = 'hidden'; });
+ 
+        const canvas = await html2canvas(target, {
+          backgroundColor: '#111416',
+          scale: 2,
+          useCORS: true
+        });
+ 
+        toHide.forEach(el => { if (el) el.style.visibility = ''; });
+ 
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+ 
+        pdf.setFillColor(17, 20, 22);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        pdf.setTextColor(87, 241, 219);
+        pdf.setFontSize(14);
+        pdf.text('OsteoScan AI — Diagnosis Report', 10, 12);
+        pdf.setTextColor(140, 148, 158);
+        pdf.setFontSize(8);
+        pdf.text(`Generated ${new Date().toLocaleString()} · Research use only, not for clinical diagnosis`, 10, 18);
+ 
+        let heightLeft = imgHeight;
+        let position = 24;
+        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
+        heightLeft -= (pageHeight - position);
+ 
+        while (heightLeft > 0) {
+          pdf.addPage();
+          pdf.setFillColor(17, 20, 22);
+          pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+          position = heightLeft - imgHeight;
+          pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+ 
+        pdf.save(`OsteoScan_Report_${Date.now()}.pdf`);
+      } catch (err) {
+        console.error('PDF export failed:', err);
+        alert('Could not generate PDF. Please try again.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
+    });
+  </script>
+</body>
+</html>

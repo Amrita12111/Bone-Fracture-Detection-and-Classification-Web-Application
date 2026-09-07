@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — 3D Skeleton View</title>
+  <meta name="description" content="View your detected fracture region on an interactive 3D skeleton model."/>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+ 
+  <style>
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px;
+    }
+ 
+    /* ── Top Bar ── */
+    .page-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 20px; gap: 12px;
+      background: #111416; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 4px;
+      text-decoration: none; color: #bacac5;
+      font-size: 13px; font-weight: 500;
+      padding: 6px 10px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: color .2s, border-color .2s;
+    }
+    .back-btn:hover { color: #57f1db; border-color: rgba(87,241,219,0.3); }
+    .back-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .page-brand { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 17px; color: #57f1db; letter-spacing: -0.4px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .logout-btn {
+      background: none; border: 1px solid #ef4444; color: #ef4444;
+      padding: 4px 11px; border-radius: 20px; font-size: 11px;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: background .2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+ 
+    /* ── Main ── */
+    .page-main {
+      padding: 80px 20px 24px; max-width: 720px;
+      margin: 0 auto; display: flex; flex-direction: column; gap: 18px;
+    }
+    .page-title {
+      font-family: 'Manrope', sans-serif; font-weight: 800;
+      font-size: clamp(22px, 5vw, 28px); letter-spacing: -0.5px;
+    }
+    .page-title em { color: #57f1db; font-style: normal; }
+    .page-sub { font-size: 13px; color: #bacac5; line-height: 1.6; margin-top: -8px; }
+ 
+    /* ── Fracture summary banner ── */
+    .fracture-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 14px; padding: 14px 16px;
+    }
+    .fracture-banner .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #ef4444; flex-shrink: 0;
+      animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
+      70%  { box-shadow: 0 0 0 9px rgba(239,68,68,0); }
+      100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    }
+    .fracture-banner .text { flex: 1; font-size: 12.5px; line-height: 1.5; color: #e2e2e5; }
+    .fracture-banner .text strong { color: #ef4444; }
+ 
+    /* ── No-data card ── */
+    .empty-card {
+      background: #1e2022; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 48px 24px; text-align: center;
+    }
+    .empty-card .icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-card h2 { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+    .empty-card p { font-size: 13px; color: #bacac5; line-height: 1.6; max-width: 380px; margin: 0 auto 20px; }
+    .empty-card a {
+      display: inline-block; padding: 10px 24px;
+      background: linear-gradient(135deg, #57f1db, #2dd4bf);
+      color: #003731; font-weight: 700; font-size: 13px;
+      border-radius: 10px; text-decoration: none; font-family: 'Manrope', sans-serif;
+    }
+ 
+    /* ── Skeleton viewer card ── */
+    .skeleton-card {
+      background: #1e2022; border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; overflow: hidden;
+    }
+    .skeleton-embed-wrap { position: relative; }
+    .sketchfab-embed-wrapper { width: 100%; overflow: hidden; }
+    .sketchfab-embed-wrapper iframe { width: 100%; height: 460px; border: none; display: block; }
+    .sketchfab-embed-wrapper p { display: none; }
+ 
+    .skeleton-3d-badge {
+      position: absolute; bottom: 14px; right: 14px;
+      background: rgba(87,241,219,0.1); border: 1px solid rgba(87,241,219,0.22);
+      border-radius: 10px; padding: 6px 8px; display: flex;
+      align-items: center; justify-content: center; backdrop-filter: blur(8px);
+      pointer-events: none; z-index: 5;
+    }
+    .skeleton-3d-badge .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 18px; color: #57f1db;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── Body-part fracture marker overlay ── */
+    .marker-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 4; }
+    .marker-overlay.calibrate-mode { pointer-events: auto; cursor: crosshair; }
+ 
+    /* ── Calibration mode UI ── */
+    .calibrate-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px 0;
+    }
+    .calibrate-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: #bacac5; font-size: 11px; font-weight: 600;
+      padding: 6px 12px; border-radius: 8px; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: border-color .2s, color .2s;
+    }
+    .calibrate-btn.active { border-color: #57f1db; color: #57f1db; background: rgba(87,241,219,0.08); }
+    .calibrate-btn .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 14px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .calibrate-hint {
+      font-size: 10.5px; color: #8b949e; padding: 8px 20px 0;
+      display: none;
+    }
+    .calibrate-hint.show { display: block; }
+    .calibrate-readout {
+      position: absolute; z-index: 6;
+      background: #111416; border: 1px solid #57f1db;
+      color: #57f1db; font-size: 10px; font-family: 'Inter', sans-serif;
+      padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+      transform: translate(-50%, -130%); pointer-events: none;
+    }
+    .calibrate-dot {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: #57f1db; transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px rgba(87,241,219,0.8); z-index: 6;
+    }
+    .calibrate-log {
+      margin: 10px 20px 0; padding: 10px 12px;
+      background: #0c0e0f; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; font-family: 'Menlo', 'Consolas', monospace;
+      font-size: 11px; color: #9ae6d4; max-height: 140px; overflow-y: auto;
+      display: none; white-space: pre-wrap; line-height: 1.6;
+    }
+    .calibrate-log.show { display: block; }
+    /* Soft glowing red region over the affected body part (matches X-ray/heatmap look) */
+    .body-marker {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(255,0,0,1) 0%,
+        rgba(255,10,10,0.98) 45%,
+        rgba(255,20,20,0.85) 70%,
+        rgba(255,0,0,0.35) 88%,
+        rgba(255,0,0,0) 100%);
+      box-shadow: 0 0 14px 4px rgba(255,0,0,0.55);
+      animation: glowPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.75; transform: translate(-50%, -50%) scale(0.94); }
+      50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.05); }
+    }
+    .marker-tag {
+      position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+      font-size: 9px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: #fca5a5; background: rgba(17,20,22,0.85); padding: 2px 6px;
+      border-radius: 5px; white-space: nowrap; border: 1px solid rgba(239,68,68,0.3);
+    }
+ 
+    /* ── Legend / detected list under viewer ── */
+    .affected-list { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 8px; }
+    .affected-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+      font-size: 12.5px;
+    }
+    .affected-item .label { display: flex; align-items: center; gap: 8px; }
+    .affected-item .swatch { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+    .affected-item .conf { color: #57f1db; font-weight: 700; }
+ 
+    .run-again {
+      display: inline-flex; align-items: center; gap: 5px;
+      color: #57f1db; font-size: 13px; text-decoration: none;
+      font-weight: 500; transition: opacity .2s;
+    }
+    .run-again:hover { opacity: .75; }
+    .run-again .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 15px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; text-decoration: none; padding: 6px 16px; border-radius: 12px;
+      transition: all .2s; color: #6b7280; border: none; background: transparent; cursor: pointer;
+    }
+    .nav-item:hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+ 
+  <!-- ── Top Bar ── -->
+  <header class="page-header">
+    <div class="header-left">
+      <a href="results.html" class="back-btn">
+        <span class="mat-icon">arrow_back</span>
+        Results
+      </a>
+      <span class="page-brand">3D Skeleton</span>
+    </div>
+    <div class="header-right">
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+ 
+  <!-- ── Main ── -->
+  <main class="page-main">
+ 
+    <h1 class="page-title">Fracture <em>Location View</em></h1>
+    <p class="page-sub">The detected region from your last scan is highlighted below on the 3D skeleton model.</p>
+ 
+    <!-- No data state -->
+    <div class="empty-card" id="emptyPanel" style="display:none">
+      <div class="icon">🦴</div>
+      <h2>No Recent Scan Found</h2>
+      <p>Run a detection first to see the fracture location highlighted on the 3D skeleton model.</p>
+      <a href="detect.html">Upload an X-ray</a>
+    </div>
+ 
+    <!-- Data state -->
+    <div id="dataPanel" style="display:none; display:flex; flex-direction:column; gap:18px;">
+ 
+      <div class="fracture-banner" id="fractureBanner">
+        <span class="dot"></span>
+        <span class="text" id="fractureBannerText"></span>
+      </div>
+ 
+      <div class="skeleton-card">
+        <div class="calibrate-toggle-row">
+          <span style="font-size:11px;color:#8b949e;">Marker not lined up right?</span>
+          <button class="calibrate-btn" id="calibrateBtn">
+            <span class="mat-icon">my_location</span>
+            Calibrate positions
+          </button>
+        </div>
+        <p class="calibrate-hint" id="calibrateHint">Reset the model to a front-facing view, then click directly on the body part (e.g. the hand) below. Each click logs the exact % coordinates to use.</p>
+        <div class="calibrate-log" id="calibrateLog"></div>
+ 
+        <div class="skeleton-embed-wrap">
+          <div class="sketchfab-embed-wrapper">
+            <iframe
+              title="Male Skeleton"
+              frameborder="0"
+              allowfullscreen
+              mozallowfullscreen="true"
+              webkitallowfullscreen="true"
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+              xr-spatial-tracking
+              execution-while-out-of-viewport
+              execution-while-not-rendered
+              web-share
+              src="https://sketchfab.com/models/11b57ebfcf6c4e3b88d0cbe618ee70a7/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0">
+            </iframe>
+          </div>
+          <div class="marker-overlay" id="markerOverlay"></div>
+          <div class="skeleton-3d-badge">
+            <span class="mat-icon">3d_rotation</span>
+          </div>
+        </div>
+ 
+        <div class="affected-list" id="affectedList"></div>
+      </div>
+ 
+      <a href="results.html" class="run-again">
+        <span class="mat-icon">arrow_back</span>
+        Back to full report
+      </a>
+    </div>
+ 
+  </main>
+ 
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+ 
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+    function logout() { sessionStorage.removeItem('osteo_user'); window.location.href = 'login.html'; }
+ 
+    // ── Approximate marker positions (% of viewer box) for a front-facing,
+    // default-camera T-pose. Not tied to the 3D mesh — tune if your model's
+    // framing differs from the default.
+    // size = { w, h } glow diameter in px. Bigger ovals for fleshy/wide
+    // regions (hands, feet, chest), smaller for narrow joints (wrist, knee).
+    const DEFAULT_SIZE = { w: 34, h: 34 };
+    const BODY_PART_POSITIONS = {
+      skull:    [{ top: '8%',  left: '50%', size: { w: 46, h: 54 } }],
+      head:     [{ top: '8%',  left: '50%', size: { w: 46, h: 54 } }],
+      neck:     [{ top: '16%', left: '50%' }],
+      spine:    [{ top: '24%', left: '50%', size: { w: 30, h: 90 } }],
+      rib:      [{ top: '24%', left: '50%', size: { w: 70, h: 60 } }],
+      chest:    [{ top: '24%', left: '50%', size: { w: 70, h: 60 } }],
+      torso:    [{ top: '24%', left: '50%', size: { w: 70, h: 60 } }],
+      shoulder: [{ top: '26%', left: '24%' }, { top: '26%', left: '76%' }],
+      humerus:  [{ top: '36%', left: '16%', size: { w: 26, h: 60 } }, { top: '36%', left: '84%', size: { w: 26, h: 60 } }],
+      arm:      [{ top: '36%', left: '16%', size: { w: 26, h: 60 } }, { top: '36%', left: '84%', size: { w: 26, h: 60 } }],
+      elbow:    [{ top: '46%', left: '12%' }, { top: '46%', left: '88%' }],
+      forearm:  [{ top: '46%', left: '12%', size: { w: 24, h: 50 } }, { top: '46%', left: '88%', size: { w: 24, h: 50 } }],
+      wrist:    [{ top: '52%', left: '9%'  }, { top: '52%', left: '91%' }],
+      hand:     [{ top: '49%', left: '34%', size: { w: 34, h: 46 } }, { top: '49%', left: '66%', size: { w: 34, h: 46 } }],
+      finger:   [{ top: '58%', left: '8%',  size: { w: 26, h: 34 } }, { top: '58%', left: '92%', size: { w: 26, h: 34 } }],
+      pelvis:   [{ top: '54%', left: '50%', size: { w: 60, h: 40 } }],
+      hip:      [{ top: '54%', left: '50%', size: { w: 60, h: 40 } }],
+      femur:    [{ top: '66%', left: '43%', size: { w: 26, h: 70 } }, { top: '66%', left: '57%', size: { w: 26, h: 70 } }],
+      thigh:    [{ top: '66%', left: '43%', size: { w: 26, h: 70 } }, { top: '66%', left: '57%', size: { w: 26, h: 70 } }],
+      leg:      [{ top: '70%', left: '43%', size: { w: 24, h: 70 } }, { top: '70%', left: '57%', size: { w: 24, h: 70 } }],
+      knee:     [{ top: '76%', left: '43%' }, { top: '76%', left: '57%' }],
+      tibia:    [{ top: '84%', left: '43%', size: { w: 22, h: 60 } }, { top: '84%', left: '57%', size: { w: 22, h: 60 } }],
+      shin:     [{ top: '84%', left: '43%', size: { w: 22, h: 60 } }, { top: '84%', left: '57%', size: { w: 22, h: 60 } }],
+      ankle:    [{ top: '94%', left: '43%' }, { top: '94%', left: '57%' }],
+      foot:     [{ top: '95%', left: '43%', size: { w: 30, h: 22 } }, { top: '95%', left: '57%', size: { w: 30, h: 22 } }],
+    };
+ 
+    function findMarkerPositions(bodyPart) {
+      const key = (bodyPart || '').toLowerCase().trim();
+      if (BODY_PART_POSITIONS[key]) return BODY_PART_POSITIONS[key];
+      const match = Object.keys(BODY_PART_POSITIONS).find(k => key.includes(k));
+      return match ? BODY_PART_POSITIONS[match] : null;
+    }
+ 
+    const severityColors = { Critical:'#dc2626', High:'#ef4444', Medium:'#f97316', Low:'#f59e0b', None:'#57f1db' };
+ 
+    function init() {
+      const lastResult = JSON.parse(sessionStorage.getItem('osteo_result') || 'null');
+ 
+      if (!lastResult || lastResult.no_fracture || !lastResult.detections?.length) {
+        document.getElementById('emptyPanel').style.display = 'block';
+        return;
+      }
+ 
+      document.getElementById('dataPanel').style.display = 'flex';
+ 
+      const affectedParts = [...new Set(lastResult.detections.map(d => d.body_part))];
+      const overlay = document.getElementById('markerOverlay');
+ 
+      affectedParts.forEach(part => {
+        const positions = findMarkerPositions(part);
+        if (!positions) return;
+        positions.forEach(pos => {
+          const marker = document.createElement('div');
+          marker.className = 'body-marker';
+          marker.style.top = pos.top;
+          marker.style.left = pos.left;
+          const size = pos.size || DEFAULT_SIZE;
+          marker.style.width = size.w + 'px';
+          marker.style.height = size.h + 'px';
+          if (positions.length > 1) {
+            const tag = document.createElement('span');
+            tag.className = 'marker-tag';
+            tag.textContent = part;
+            marker.appendChild(tag);
+          }
+          overlay.appendChild(marker);
+        });
+      });
+ 
+      document.getElementById('fractureBannerText').innerHTML =
+        `<strong>${lastResult.highest_severity} severity</strong> — fracture${affectedParts.length > 1 ? 's' : ''} detected in <strong>${affectedParts.join(', ')}</strong>.`;
+ 
+      // List each detection under the viewer as a legend
+      const listEl = document.getElementById('affectedList');
+      lastResult.detections.forEach(det => {
+        const color = det.color || severityColors[det.severity] || '#ef4444';
+        const row = document.createElement('div');
+        row.className = 'affected-item';
+        row.innerHTML = `
+          <span class="label">
+            <span class="swatch" style="background:${color}"></span>
+            ${det.class} Fracture · ${det.body_part}
+          </span>
+          <span class="conf">${det.confidence}%</span>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+ 
+    // ── Calibration mode: click on the model to get exact marker coordinates ──
+    (function setupCalibration() {
+      const btn = document.getElementById('calibrateBtn');
+      const hint = document.getElementById('calibrateHint');
+      const overlay = document.getElementById('markerOverlay');
+      const log = document.getElementById('calibrateLog');
+      let active = false;
+      let clicks = [];
+ 
+      btn.addEventListener('click', () => {
+        active = !active;
+        btn.classList.toggle('active', active);
+        hint.classList.toggle('show', active);
+        overlay.classList.toggle('calibrate-mode', active);
+        log.classList.toggle('show', active && clicks.length > 0);
+        if (!active) {
+          // clear temp calibration visuals when turning off, keep real fracture markers
+          overlay.querySelectorAll('.calibrate-dot, .calibrate-readout').forEach(el => el.remove());
+        }
+      });
+ 
+      overlay.addEventListener('click', (e) => {
+        if (!active) return;
+        const rect = overlay.getBoundingClientRect();
+        const leftPct = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        const topPct = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+ 
+        const dot = document.createElement('div');
+        dot.className = 'calibrate-dot';
+        dot.style.left = leftPct + '%';
+        dot.style.top = topPct + '%';
+        overlay.appendChild(dot);
+ 
+        const readout = document.createElement('div');
+        readout.className = 'calibrate-readout';
+        readout.style.left = leftPct + '%';
+        readout.style.top = topPct + '%';
+        readout.textContent = `top: ${topPct}%, left: ${leftPct}%`;
+        overlay.appendChild(readout);
+ 
+        clicks.push({ top: topPct + '%', left: leftPct + '%' });
+        log.classList.add('show');
+        log.textContent = 'Copy these into BODY_PART_POSITIONS:\n\n' +
+          clicks.map((c, i) => `Click ${i + 1}: { top: '${c.top}', left: '${c.left}' }`).join('\n');
+      });
+    })();
+ 
+    init();
+  </script>
+</body>
+</html>

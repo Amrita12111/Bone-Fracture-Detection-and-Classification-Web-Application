@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Scan History</title>
+  <meta name="description" content="View your past bone fracture scan history from OsteoScan AI."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px;
+    }
+
+    /* ── Top Bar ── */
+    .page-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: #111416;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .page-header .brand {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: #57f1db;
+      letter-spacing: -0.5px;
+    }
+    .page-header .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #bacac5;
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .2s, color .2s;
+    }
+    .icon-btn:hover { border-color: #ef4444; color: #ef4444; }
+    .icon-btn .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── Page Content ── */
+    .page-main {
+      padding: 80px 20px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Section Title ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .section-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.4px;
+    }
+    .section-sub {
+      font-size: 13px;
+      color: #bacac5;
+      margin-top: 2px;
+    }
+    .count-badge {
+      background: rgba(87,241,219,0.12);
+      border: 1px solid rgba(87,241,219,0.2);
+      color: #57f1db;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* ── Stats Summary Strip ── */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .strip-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .strip-val {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: #57f1db;
+      display: block;
+    }
+    .strip-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bacac5;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ── History List ── */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Single History Card ── */
+    .hist-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color .2s, transform .15s;
+      animation: slideUp .35s ease both;
+    }
+    .hist-card:hover {
+      border-color: rgba(87,241,219,0.25);
+      transform: translateY(-1px);
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    .hist-icon-wrap {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+    .hist-icon-wrap.fracture { background: rgba(239,68,68,0.12); }
+    .hist-icon-wrap.clear    { background: rgba(87,241,219,0.1); }
+    .hist-icon-wrap .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 22px;
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .hist-icon-wrap.fracture .mat-icon { color: #ef4444; }
+    .hist-icon-wrap.clear    .mat-icon { color: #57f1db; }
+
+    .hist-body { flex: 1; min-width: 0; }
+    .hist-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #e2e2e5;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hist-meta {
+      font-size: 11px;
+      color: #bacac5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hist-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: #6b7280; }
+    .hist-confidence {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: #bacac5;
+    }
+
+    .severity-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 6px;
+    }
+
+    .hist-arrow {
+      align-self: center;
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+    .hist-arrow .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 18px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      display: none;
+    }
+    .empty-state .empty-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 56px;
+      color: #333537;
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+      display: block;
+      margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 13px; color: #4b5563; line-height: 1.6; }
+    .empty-state a {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 11px 28px;
+      background: linear-gradient(135deg, #57f1db, #2dd4bf);
+      color: #003731;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; text-decoration: none;
+      padding: 6px 16px; border-radius: 12px;
+      transition: all .2s ease;
+      color: #6b7280;
+      border: none; background: transparent; cursor: pointer;
+    }
+    .nav-item.active { background: rgba(87,241,219,0.1); color: #57f1db; }
+    .nav-item:not(.active):hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-item.active .mat-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top App Bar ── -->
+  <header class="page-header">
+    <span class="brand">Scan History</span>
+    <div class="header-actions">
+      <button class="icon-btn" id="clearAllBtn" title="Clear all history">
+        <span class="mat-icon">delete_sweep</span>
+        Clear All
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="page-main">
+
+    <!-- Stats Strip -->
+    <section class="summary-strip" id="summaryStrip">
+      <div class="strip-card">
+        <span class="strip-val" id="totalScans">0</span>
+        <span class="strip-lbl">Total Scans</span>
+      </div>
+      <div class="strip-card">
+        <span class="strip-val" id="fracturesFound" style="color:#ef4444">0</span>
+        <span class="strip-lbl">Fractures Found</span>
+      </div>
+      <div class="strip-card">
+        <span class="strip-val" id="clearScans">0</span>
+        <span class="strip-lbl">Clear Scans</span>
+      </div>
+    </section>
+
+    <!-- Header Row -->
+    <div>
+      <div class="section-head">
+        <span class="section-title">Recent Scans</span>
+        <span class="count-badge" id="countBadge">0 scans</span>
+      </div>
+      <p class="section-sub">Your X-ray analysis history is stored locally.</p>
+    </div>
+
+    <!-- History Cards -->
+    <div class="history-list" id="historyList"></div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <span class="empty-icon">history</span>
+      <h3>No scans yet</h3>
+      <p>Upload an X-ray on the detect page and your results will appear here automatically.</p>
+      <a href="detect.html">Start a Scan →</a>
+    </div>
+
+  </main>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item" id="navHome">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="history.html" class="nav-item active" id="navHistory">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item" id="navSettings">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+
+    /* ── History stored as JSON array in localStorage ── */
+    const HISTORY_KEY = 'osteo_scan_history';
+
+    function getHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+    function saveHistory(h) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    }
+
+    /* ── Severity colour helper ── */
+    function sevColor(sev) {
+      const map = { Critical:'#dc2626', High:'#ef4444', Medium:'#f97316', Low:'#f59e0b', None:'#57f1db' };
+      return map[sev] || '#8b949e';
+    }
+
+    /* ── Render ── */
+    function renderHistory() {
+      const history = getHistory();
+      const list    = document.getElementById('historyList');
+      const empty   = document.getElementById('emptyState');
+
+      document.getElementById('totalScans').textContent   = history.length;
+      document.getElementById('fracturesFound').textContent = history.filter(h => h.hasFracture).length;
+      document.getElementById('clearScans').textContent   = history.filter(h => !h.hasFracture).length;
+      document.getElementById('countBadge').textContent   = history.length + ' scan' + (history.length !== 1 ? 's' : '');
+
+      list.innerHTML = '';
+
+      if (history.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      history.slice().reverse().forEach((item, i) => {
+        const color = sevColor(item.severity);
+        const card  = document.createElement('div');
+        card.className = 'hist-card';
+        card.style.animationDelay = `${i * 0.06}s`;
+        card.innerHTML = `
+          <div class="hist-icon-wrap ${item.hasFracture ? 'fracture' : 'clear'}">
+            <span class="mat-icon">${item.hasFracture ? 'broken_image' : 'verified'}</span>
+          </div>
+          <div class="hist-body">
+            <div class="hist-title" title="${item.filename}">${item.filename}</div>
+            <div class="hist-meta">
+              <span>${item.date}</span>
+              <span class="dot"></span>
+              <span>${item.time}</span>
+              <span class="dot"></span>
+              <span class="hist-confidence">${item.inferenceMs} ms</span>
+            </div>
+            <div>
+              <span class="severity-pill" style="background:${color}18;color:${color};border:1px solid ${color}33">
+                ${item.hasFracture ? item.severity + ' Severity' : 'No Fracture'}
+              </span>
+              ${item.hasFracture ? `<span style="font-size:10px;color:#bacac5;margin-left:6px;">${item.totalDetected} fracture${item.totalDetected !== 1 ? 's' : ''}</span>` : ''}
+            </div>
+          </div>
+          <div class="hist-arrow"><span class="mat-icon">chevron_right</span></div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    /* ── Clear All ── */
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (getHistory().length === 0) return;
+      if (confirm('Clear all scan history? This cannot be undone.')) {
+        saveHistory([]);
+        renderHistory();
+      }
+    });
+
+    /* Expose helper for detect page to save results */
+    window.saveToHistory = function(entry) {
+      const h = getHistory();
+      h.push(entry);
+      saveHistory(h);
+    };
+
+    renderHistory();
+  </script>
+</body>
+</html>

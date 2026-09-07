@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OsteoScan AI — Fracture Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🦴</span>
+        <div>
+          <span class="logo-name">OsteoScan AI</span>
+          <span class="logo-tag">Fracture Intelligence</span>
+        </div>
+      </div>
+      <nav class="nav">
+        <span class="nav-badge">YOLOv8m</span>
+        <span class="nav-badge accent">10 Fracture Classes</span>
+        <div class="status-dot" id="statusDot"></div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">Bone Fracture<br/><em>Detection & Classification</em></h1>
+      <p class="hero-sub">Upload an X-ray image. Our YOLOv8 model detects and classifies fractures — including hairline — in real time.</p>
+    </section>
+
+    <!-- Upload Panel -->
+    <section class="panel upload-panel">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">⬆</div>
+        <p class="drop-title">Drop X-ray here</p>
+        <p class="drop-sub">or <label class="browse-link" for="fileInput">browse file</label></p>
+        <p class="drop-hint">PNG, JPG, JPEG, WEBP · Max 16 MB</p>
+        <input type="file" id="fileInput" accept="image/*" hidden />
+      </div>
+
+      <!-- Confidence Slider -->
+      <div class="conf-row">
+        <label class="conf-label">Confidence Threshold</label>
+        <div class="conf-control">
+          <input type="range" id="confSlider" min="10" max="90" value="25" class="slider" />
+          <span class="conf-val" id="confVal">25%</span>
+        </div>
+      </div>
+
+      <button class="detect-btn" id="detectBtn" disabled>
+        <span id="btnText">Detect Fractures</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </section>
+
+    <!-- Preview -->
+    <section class="panel preview-panel" id="previewPanel" style="display:none">
+      <h2 class="panel-title">X-ray Preview</h2>
+      <div class="img-wrap">
+        <img id="previewImg" alt="X-ray preview" />
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="results-section" id="resultsSection" style="display:none">
+
+      <!-- Annotated Image -->
+      <div class="panel result-img-panel">
+        <h2 class="panel-title">Detection Result</h2>
+        <div class="img-wrap">
+          <img id="resultImg" alt="Annotated result" />
+        </div>
+        <div class="meta-row">
+          <span class="meta-item" id="inferenceTime">—</span>
+          <button class="download-btn" id="downloadBtn">⬇ Download</button>
+        </div>
+      </div>
+
+      <!-- Detections List -->
+      <div class="panel detections-panel">
+        <h2 class="panel-title">Diagnosis Report</h2>
+        <div id="summaryCard" class="summary-card"></div>
+        <div id="detectionsList" class="detections-list"></div>
+      </div>
+
+    </section>
+
+    <!-- No Fracture -->
+    <section class="panel no-fracture-panel" id="noFracturePanel" style="display:none">
+      <div class="no-fracture-icon">✅</div>
+      <h2>No Fracture Detected</h2>
+      <p>The model found no fractures above the confidence threshold. Consider lowering the threshold or consulting a specialist for borderline cases.</p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>OsteoScan AI · YOLOv8m · For research and clinical assistance only · Not a substitute for professional diagnosis</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

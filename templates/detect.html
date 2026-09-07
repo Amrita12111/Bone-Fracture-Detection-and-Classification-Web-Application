@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Detect Fractures</title>
+  <meta name="description" content="Upload an X-ray image to detect and classify bone fractures using YOLOv8m AI."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px;
+    }
+
+    /* ── Top Bar ── */
+    .page-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #111416;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 12px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 4px;
+      text-decoration: none;
+      color: #bacac5;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: color .2s, border-color .2s;
+    }
+    .back-btn:hover { color: #57f1db; border-color: rgba(87,241,219,0.3); }
+    .back-btn .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 16px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .page-brand {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: #57f1db;
+      letter-spacing: -0.4px;
+    }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .user-pill {
+      font-size: 11px; font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(87,241,219,0.3);
+      color: #57f1db;
+      background: rgba(87,241,219,0.06);
+    }
+    .logout-btn {
+      background: none;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      padding: 4px 11px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background .2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+    /* ── Page Content ── */
+    .page-main {
+      padding: 80px 20px 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Hero ── */
+    .detect-hero { padding: 8px 0 4px; }
+    .detect-hero h1 {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: clamp(26px, 6vw, 36px);
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .detect-hero h1 em { color: #57f1db; font-style: normal; }
+    .detect-hero p { font-size: 13px; color: #bacac5; line-height: 1.65; }
+
+    /* ── Upload Panel ── */
+    .upload-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ── Drop Zone ── */
+    .drop-zone {
+      border: 2px dashed rgba(255,255,255,0.13);
+      border-radius: 12px;
+      padding: 48px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .drop-zone:hover, .drop-zone.active {
+      border-color: #57f1db;
+      background: rgba(87,241,219,0.04);
+    }
+    .drop-icon { font-size: 32px; margin-bottom: 10px; opacity: .55; }
+    .drop-title { font-size: 16px; font-weight: 600; color: #e2e2e5; margin-bottom: 5px; }
+    .drop-sub   { font-size: 13px; color: #bacac5; }
+    .browse-link { color: #57f1db; cursor: pointer; text-decoration: underline; }
+    .drop-hint  { font-size: 11px; color: #6b7280; margin-top: 8px; font-family: 'Inter', sans-serif; }
+
+    /* ── Confidence Row ── */
+    .conf-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 14px; flex-wrap: wrap;
+    }
+    .conf-label { font-size: 13px; font-weight: 500; color: #bacac5; }
+    .conf-control { display: flex; align-items: center; gap: 10px; }
+    .slider {
+      -webkit-appearance: none;
+      width: 160px; height: 4px;
+      border-radius: 4px;
+      background: #333537;
+      outline: none; cursor: pointer;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 17px; height: 17px; border-radius: 50%;
+      background: #57f1db; cursor: pointer;
+      box-shadow: 0 0 6px rgba(87,241,219,0.4);
+    }
+    .conf-val { font-size: 13px; font-weight: 700; color: #57f1db; min-width: 36px; font-family: 'Inter', sans-serif; }
+
+    /* ── Detect Button ── */
+    .detect-btn {
+      width: 100%; padding: 15px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: linear-gradient(135deg, #57f1db, #2dd4bf);
+      color: #003731; font-family: 'Manrope', sans-serif;
+      font-size: 15px; font-weight: 700;
+      border: none; border-radius: 12px; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(87,241,219,0.22);
+      transition: opacity .2s, transform .1s, box-shadow .2s;
+    }
+    .detect-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); box-shadow: 0 10px 26px rgba(87,241,219,0.28); }
+    .detect-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+    /* ── Preview Panel ── */
+    .preview-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .preview-card h2 {
+      font-family: 'Manrope', sans-serif; font-weight: 700;
+      font-size: 16px; color: #e2e2e5; margin-bottom: 14px;
+    }
+    .img-wrap {
+      border-radius: 10px; overflow: hidden;
+      background: #000; display: flex;
+      align-items: center; justify-content: center;
+      min-height: 180px;
+    }
+    .img-wrap img { width: 100%; height: auto; display: block; max-height: 480px; object-fit: contain; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,55,49,0.3);
+      border-top-color: #003731;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; text-decoration: none; padding: 6px 16px; border-radius: 12px;
+      transition: all .2s; color: #6b7280; border: none; background: transparent; cursor: pointer;
+    }
+    .nav-item:hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined'; font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top Bar ── -->
+  <header class="page-header">
+    <div class="header-left">
+      <a href="home.html" class="back-btn">
+        <span class="mat-icon">arrow_back</span>
+        Home
+      </a>
+      <span class="page-brand">Detect</span>
+    </div>
+    <div class="header-right">
+      <span class="user-pill" id="userPill">Doctor</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="page-main">
+
+    <!-- Hero -->
+    <div class="detect-hero">
+      <h1>Upload <em>X-ray Image</em></h1>
+      <p>Drop a bone X-ray and our YOLOv8m model will detect and classify fractures in real time.</p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="upload-card">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">⬆</div>
+        <p class="drop-title">Drop X-ray here</p>
+        <p class="drop-sub">or <label class="browse-link" for="fileInput">browse file</label></p>
+        <p class="drop-hint">PNG · JPG · JPEG · WEBP · Max 16 MB</p>
+        <input type="file" id="fileInput" accept="image/*" hidden/>
+      </div>
+
+      <div class="conf-row">
+        <label class="conf-label">Confidence Threshold</label>
+        <div class="conf-control">
+          <input type="range" id="confSlider" min="10" max="90" value="25" class="slider"/>
+          <span class="conf-val" id="confVal">25%</span>
+        </div>
+      </div>
+
+      <button class="detect-btn" id="detectBtn" disabled>
+        <span id="btnText">Detect Fractures</span>
+        <span style="font-size:18px;">→</span>
+      </button>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="preview-card" id="previewPanel" style="display:none">
+      <h2>X-ray Preview</h2>
+      <div class="img-wrap">
+        <img id="previewImg" alt="X-ray preview"/>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+
+  <script>
+    const API_BASE = "http://localhost:5000";
+
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+    const displayName = user ? user.charAt(0).toUpperCase() + user.slice(1) : 'Doctor';
+    document.getElementById('userPill').textContent = displayName;
+    function logout() { sessionStorage.removeItem('osteo_user'); window.location.href = 'login.html'; }
+
+    // Load confidence from settings
+    try {
+      const prefs = JSON.parse(localStorage.getItem('osteo_settings') || '{}');
+      if (prefs.confidence) {
+        document.getElementById('confSlider').value = prefs.confidence;
+        document.getElementById('confVal').textContent = prefs.confidence + '%';
+      }
+    } catch(e) {}
+
+    const dropZone    = document.getElementById('dropZone');
+    const fileInput   = document.getElementById('fileInput');
+    const confSlider  = document.getElementById('confSlider');
+    const confVal     = document.getElementById('confVal');
+    const detectBtn   = document.getElementById('detectBtn');
+    const btnText     = document.getElementById('btnText');
+    const previewPanel = document.getElementById('previewPanel');
+    const previewImg   = document.getElementById('previewImg');
+    let selectedFile  = null;
+
+    // Drag & Drop
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('active'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('active'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+    confSlider.addEventListener('input', () => confVal.textContent = confSlider.value + '%');
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) { alert('Please upload an image file.'); return; }
+      if (file.size > 16 * 1024 * 1024) { alert('File too large. Max 16 MB.'); return; }
+      selectedFile = file;
+      previewImg.src = URL.createObjectURL(file);
+      previewPanel.style.display = 'block';
+      detectBtn.disabled = false;
+      dropZone.querySelector('.drop-title').textContent = file.name;
+    }
+
+    // Detect & save to history
+    detectBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      detectBtn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span> Analyzing…';
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      formData.append('confidence', confSlider.value / 100);
+
+      try {
+        const res  = await fetch(`${API_BASE}/detect`, { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Detection failed');
+
+        // ── Save to history ──
+        try {
+          const history = JSON.parse(localStorage.getItem('osteo_scan_history') || '[]');
+          const now = new Date();
+          history.push({
+            filename:      selectedFile.name,
+            date:          now.toLocaleDateString(),
+            time:          now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            inferenceMs:   data.inference_time_ms || '—',
+            hasFracture:   !data.no_fracture,
+            severity:      data.highest_severity || 'None',
+            totalDetected: data.total_detected   || 0,
+          });
+          localStorage.setItem('osteo_scan_history', JSON.stringify(history));
+        } catch(e) { console.warn('History save failed', e); }
+
+        // ── Navigate to results ──
+        sessionStorage.setItem('osteo_result', JSON.stringify(data));
+        window.location.href = 'results.html';
+      } catch (err) {
+        alert('Error: ' + err.message);
+        detectBtn.disabled = false;
+        btnText.textContent = 'Detect Fractures';
+      }
+    });
+  </script>
+</body>
+</html>

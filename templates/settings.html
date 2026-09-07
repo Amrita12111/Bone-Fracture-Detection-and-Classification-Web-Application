@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Settings</title>
+  <meta name="description" content="Configure OsteoScan AI detection settings, account preferences, and appearance options."/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px;
+    }
+
+    /* ── Top Bar ── */
+    .page-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      background: #111416;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 12px;
+    }
+    .page-header .brand {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: #57f1db;
+      letter-spacing: -0.5px;
+    }
+
+    /* ── Main ── */
+    .page-main {
+      padding: 80px 20px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Profile Card ── */
+    .profile-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .profile-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a4f47, #2dd4bf);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 24px;
+      color: #003731;
+      flex-shrink: 0;
+    }
+    .profile-info { flex: 1; }
+    .profile-name {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: #e2e2e5;
+      margin-bottom: 3px;
+    }
+    .profile-role {
+      font-size: 12px;
+      color: #bacac5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .profile-role .role-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #57f1db;
+      box-shadow: 0 0 6px rgba(87,241,219,0.6);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    /* ── Settings Group ── */
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .group-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #57f1db;
+      padding: 0 4px;
+      margin-bottom: 8px;
+    }
+    .settings-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    /* ── Settings Row ── */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 18px;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background .15s;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row:hover { background: rgba(255,255,255,0.02); }
+    .setting-row.clickable { cursor: pointer; }
+
+    .setting-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+    .setting-icon-wrap {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(87,241,219,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .setting-icon-wrap .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 19px;
+      color: #57f1db;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .setting-icon-wrap.danger { background: rgba(239,68,68,0.08); }
+    .setting-icon-wrap.danger .mat-icon { color: #ef4444; }
+    .setting-icon-wrap.warn   { background: rgba(249,115,22,0.08); }
+    .setting-icon-wrap.warn   .mat-icon { color: #f97316; }
+
+    .setting-text { flex: 1; min-width: 0; }
+    .setting-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e2e2e5;
+      margin-bottom: 2px;
+    }
+    .setting-label.danger { color: #ef4444; }
+    .setting-desc {
+      font-size: 11px;
+      color: #bacac5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Toggle Switch ── */
+    .toggle-wrap { position: relative; flex-shrink: 0; }
+    .toggle-input {
+      position: absolute;
+      opacity: 0; width: 0; height: 0;
+    }
+    .toggle-track {
+      display: block;
+      width: 44px; height: 24px;
+      border-radius: 999px;
+      background: #333537;
+      cursor: pointer;
+      transition: background .25s;
+      position: relative;
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #6b7280;
+      transition: left .25s, background .25s;
+    }
+    .toggle-input:checked + .toggle-track { background: rgba(87,241,219,0.25); }
+    .toggle-input:checked + .toggle-track::after {
+      left: 23px;
+      background: #57f1db;
+      box-shadow: 0 0 6px rgba(87,241,219,0.5);
+    }
+
+    /* ── Slider Setting ── */
+    .setting-slider-row {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .setting-slider-row:last-child { border-bottom: none; }
+    .slider-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .slider-head-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .slider-label { font-size: 14px; font-weight: 600; color: #e2e2e5; }
+    .slider-val   { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #57f1db; }
+    .full-slider {
+      -webkit-appearance: none;
+      width: 100%; height: 4px;
+      border-radius: 4px;
+      background: #333537;
+      outline: none;
+      cursor: pointer;
+    }
+    .full-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #57f1db;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(87,241,219,0.4);
+    }
+
+    /* ── Select Setting ── */
+    .setting-select {
+      background: #282a2c;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e2e2e5;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      outline: none;
+      flex-shrink: 0;
+    }
+    .setting-select:focus { border-color: rgba(87,241,219,0.4); }
+
+    /* ── App Info ── */
+    .app-info-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .app-logo-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+    .app-info-text .app-name {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      color: #57f1db;
+    }
+    .app-info-text .app-version {
+      font-size: 11px;
+      color: #bacac5;
+      margin-top: 2px;
+    }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; text-decoration: none;
+      padding: 6px 16px; border-radius: 12px;
+      transition: all .2s ease;
+      color: #6b7280;
+      border: none; background: transparent; cursor: pointer;
+    }
+    .nav-item.active { background: rgba(87,241,219,0.1); color: #57f1db; }
+    .nav-item:not(.active):hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-item.active .mat-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top App Bar ── -->
+  <header class="page-header">
+    <span class="brand">Settings</span>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="page-main">
+
+    <!-- Profile -->
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">D</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">Doctor</div>
+        <div class="profile-role">
+          <span class="role-dot"></span>
+          <span>OsteoScan AI User</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detection Settings -->
+    <div class="settings-group">
+      <div class="group-label">Detection</div>
+      <div class="settings-card">
+
+        <!-- Confidence Threshold Slider -->
+        <div class="setting-slider-row">
+          <div class="slider-head">
+            <div class="slider-head-left">
+              <div class="setting-icon-wrap">
+                <span class="mat-icon">tune</span>
+              </div>
+              <span class="slider-label">Confidence Threshold</span>
+            </div>
+            <span class="slider-val" id="confDisplay">50%</span>
+          </div>
+          <input type="range" class="full-slider" id="globalConfSlider" min="10" max="95" value="50"/>
+        </div>
+
+        <!-- Auto-save results -->
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">save</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Auto-save Results</div>
+              <div class="setting-desc">Save every scan to history automatically</div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" id="autoSaveToggle" checked/>
+            <label class="toggle-track" for="autoSaveToggle"></label>
+          </div>
+        </div>
+
+        <!-- Annotation overlay -->
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">draw</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Show Annotation Overlay</div>
+              <div class="setting-desc">Display bounding boxes on result images</div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" id="annotationToggle" checked/>
+            <label class="toggle-track" for="annotationToggle"></label>
+          </div>
+        </div>
+
+        <!-- Model Mode -->
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">neurology</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Detection Model</div>
+              <div class="setting-desc">Active neural network model</div>
+            </div>
+          </div>
+          <select class="setting-select" id="modelSelect">
+            <option value="yolov8m" selected>YOLOv8m</option>
+            <option value="yolov8s">YOLOv8s (Fast)</option>
+            <option value="yolov8l">YOLOv8l (Accurate)</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Appearance Settings -->
+    <div class="settings-group">
+      <div class="group-label">Appearance</div>
+      <div class="settings-card">
+
+        <!-- Dark mode (always on for this app) -->
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">dark_mode</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Dark Mode</div>
+              <div class="setting-desc">Optimised for clinical environments</div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" id="darkModeToggle" checked disabled/>
+            <label class="toggle-track" for="darkModeToggle"></label>
+          </div>
+        </div>
+
+        <!-- Language -->
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">language</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Language</div>
+              <div class="setting-desc">Interface language</div>
+            </div>
+          </div>
+          <select class="setting-select" id="langSelect">
+            <option value="en" selected>English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-group">
+      <div class="group-label">Notifications</div>
+      <div class="settings-card">
+
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap warn">
+              <span class="mat-icon">notifications</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Critical Fracture Alert</div>
+              <div class="setting-desc">Alert when critical severity is detected</div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" id="alertToggle" checked/>
+            <label class="toggle-track" for="alertToggle"></label>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-left">
+            <div class="setting-icon-wrap">
+              <span class="mat-icon">mark_email_read</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Email Reports</div>
+              <div class="setting-desc">Send scan summaries to email</div>
+            </div>
+          </div>
+          <div class="toggle-wrap">
+            <input type="checkbox" class="toggle-input" id="emailToggle"/>
+            <label class="toggle-track" for="emailToggle"></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Account Actions -->
+    <div class="settings-group">
+      <div class="group-label">Account</div>
+      <div class="settings-card">
+
+        <div class="setting-row clickable" onclick="clearHistory()">
+          <div class="setting-left">
+            <div class="setting-icon-wrap danger">
+              <span class="mat-icon">delete_sweep</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label">Clear Scan History</div>
+              <div class="setting-desc">Remove all locally stored scan results</div>
+            </div>
+          </div>
+          <span class="mat-icon" style="color:#6b7280;font-size:18px;font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">chevron_right</span>
+        </div>
+
+        <div class="setting-row clickable" onclick="logout()">
+          <div class="setting-left">
+            <div class="setting-icon-wrap danger">
+              <span class="mat-icon">logout</span>
+            </div>
+            <div class="setting-text">
+              <div class="setting-label danger">Logout</div>
+              <div class="setting-desc">Sign out of your OsteoScan session</div>
+            </div>
+          </div>
+          <span class="mat-icon" style="color:#6b7280;font-size:18px;font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;">chevron_right</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- App Info -->
+    <div class="app-info-card">
+      <div class="app-logo-icon">🦴</div>
+      <div class="app-info-text">
+        <div class="app-name">OsteoScan AI</div>
+        <div class="app-version">v1.0.0 · YOLOv8m · For research &amp; clinical assistance</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item" id="navHome">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="history.html" class="nav-item" id="navHistory">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item active" id="navSettings">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+
+    // Show user info
+    const displayName = user ? user.charAt(0).toUpperCase() + user.slice(1) : 'Doctor';
+    document.getElementById('profileName').textContent   = displayName;
+    document.getElementById('profileAvatar').textContent = displayName.charAt(0).toUpperCase();
+
+    // Settings persistence via localStorage
+    const PREF_KEY = 'osteo_settings';
+    function getPrefs() {
+      try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function savePrefs(prefs) {
+      localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
+    }
+
+    const prefs = getPrefs();
+
+    // Load saved prefs
+    const confSlider    = document.getElementById('globalConfSlider');
+    const confDisplay   = document.getElementById('confDisplay');
+    confSlider.value    = prefs.confidence   ?? 50;
+    confDisplay.textContent = confSlider.value + '%';
+
+    document.getElementById('autoSaveToggle').checked   = prefs.autoSave   ?? true;
+    document.getElementById('annotationToggle').checked = prefs.annotation  ?? true;
+    document.getElementById('alertToggle').checked      = prefs.critAlert   ?? true;
+    document.getElementById('emailToggle').checked      = prefs.emailReport ?? false;
+    if (prefs.model)    document.getElementById('modelSelect').value = prefs.model;
+    if (prefs.lang)     document.getElementById('langSelect').value  = prefs.lang;
+
+    // Save on change
+    confSlider.addEventListener('input', () => {
+      confDisplay.textContent = confSlider.value + '%';
+      save();
+    });
+    ['autoSaveToggle','annotationToggle','alertToggle','emailToggle'].forEach(id => {
+      document.getElementById(id).addEventListener('change', save);
+    });
+    document.getElementById('modelSelect').addEventListener('change', save);
+    document.getElementById('langSelect').addEventListener('change',  save);
+
+    function save() {
+      savePrefs({
+        confidence:   parseInt(confSlider.value),
+        autoSave:     document.getElementById('autoSaveToggle').checked,
+        annotation:   document.getElementById('annotationToggle').checked,
+        critAlert:    document.getElementById('alertToggle').checked,
+        emailReport:  document.getElementById('emailToggle').checked,
+        model:        document.getElementById('modelSelect').value,
+        lang:         document.getElementById('langSelect').value,
+      });
+    }
+
+    function clearHistory() {
+      if (confirm('Clear all scan history? This cannot be undone.')) {
+        localStorage.removeItem('osteo_scan_history');
+        alert('Scan history cleared.');
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('osteo_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

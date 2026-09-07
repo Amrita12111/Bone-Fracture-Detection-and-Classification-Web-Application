@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #080c0f;
+      --panel:     #0d1317;
+      --surface:   #111820;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #00e5c3;
+      --accent2:   #0077ff;
+      --danger:    #ff4d6a;
+      --text:      #eef2f5;
+      --muted:     #5a7080;
+      --subtle:    #1e2d38;
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+ 
+    /* ── Left panel — visual side ── */
+    .left {
+      position: relative;
+      background: var(--panel);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      overflow: hidden;
+    }
+ 
+    /* Animated scan lines */
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,229,195,0.015) 3px,
+        rgba(0,229,195,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+ 
+    /* Glowing orb */
+    .orb {
+      position: absolute;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,119,255,0.18) 0%, rgba(0,229,195,0.08) 40%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+ 
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%,-50%) scale(1);   opacity: 1; }
+      50%       { transform: translate(-50%,-50%) scale(1.12); opacity: 0.7; }
+    }
+ 
+    /* X-ray skeleton SVG illustration */
+    .xray-art {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+ 
+    .xray-art svg {
+      width: 260px;
+      opacity: 0.18;
+      animation: float 8s ease-in-out infinite;
+    }
+ 
+    @keyframes float {
+      0%,100% { transform: translateY(0px) rotate(0deg); }
+      33%      { transform: translateY(-12px) rotate(1deg); }
+      66%      { transform: translateY(8px) rotate(-1deg); }
+    }
+ 
+    .left-brand {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+ 
+    .left-brand-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0,229,195,0.2), rgba(0,119,255,0.15));
+      border: 1px solid rgba(0,229,195,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+ 
+    .left-brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--accent);
+      letter-spacing: -0.3px;
+    }
+ 
+    .left-brand-tag {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: block;
+    }
+ 
+    .left-footer {
+      position: relative;
+      z-index: 2;
+    }
+ 
+    .left-tagline {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 38px;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+ 
+    .left-tagline em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+ 
+    .left-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 300px;
+      margin-bottom: 28px;
+    }
+ 
+ 
+ 
+    /* ── Right panel — form side ── */
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+      background: var(--bg);
+      position: relative;
+    }
+ 
+    /* Subtle grid texture */
+    .right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,195,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,195,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+ 
+    .form-wrap {
+      width: 100%;
+      max-width: 360px;
+      position: relative;
+      z-index: 1;
+    }
+ 
+    /* Animated entry */
+    .form-wrap { animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+ 
+    .form-head {
+      margin-bottom: 36px;
+    }
+ 
+    .form-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+ 
+    .form-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 20px; height: 1px;
+      background: var(--accent);
+    }
+ 
+    .form-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 30px;
+      letter-spacing: -0.8px;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+ 
+    .form-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+ 
+    /* Fields */
+    .field { margin-bottom: 18px; }
+ 
+    .field-lbl {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+ 
+    .field-inp-wrap {
+      position: relative;
+    }
+ 
+    .field-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--muted);
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+ 
+    .field-inp {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px 13px 42px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Syne', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+ 
+    .field-inp::placeholder { color: #2d4050; }
+ 
+    .field-inp:focus {
+      border-color: rgba(0,229,195,0.4);
+      box-shadow: 0 0 0 3px rgba(0,229,195,0.07), inset 0 0 0 1px rgba(0,229,195,0.1);
+    }
+ 
+    .field-inp-wrap:focus-within .field-icon {
+      color: var(--accent);
+    }
+ 
+    /* Password toggle */
+    .pwd-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 15px;
+      padding: 2px;
+      transition: color 0.2s;
+    }
+    .pwd-toggle:hover { color: var(--text); }
+ 
+    /* Error */
+    .error-msg {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255,77,106,0.08);
+      border: 1px solid rgba(255,77,106,0.2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--danger);
+      margin-bottom: 16px;
+    }
+ 
+    /* Submit button */
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--accent), #00c4a8);
+      color: #001a16;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.01em;
+      box-shadow: 0 8px 24px rgba(0,229,195,0.22);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      margin-bottom: 0;
+    }
+ 
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,229,195,0.3);
+    }
+ 
+    .login-btn:active { transform: scale(0.98); }
+ 
+    .login-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+ 
+    /* Loading spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(0,26,22,0.3);
+      border-top-color: #001a16;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+ 
+ 
+ 
+    /* Footer hint */
+    .form-foot {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+ 
+    /* Status dot */
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: blink 2s ease-in-out infinite;
+      margin-right: 5px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+ 
+    /* Responsive */
+    @media (max-width: 720px) {
+      body { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+ 
+  <!-- ── Left visual panel ── -->
+  <div class="left">
+    <div class="orb"></div>
+ 
+    <!-- Floating X-ray bone illustration -->
+    <div class="xray-art">
+      <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Simplified forearm bones (radius + ulna) -->
+        <rect x="60" y="20" width="28" height="280" rx="14" fill="white"/>
+        <rect x="112" y="20" width="24" height="260" rx="12" fill="white"/>
+        <!-- Joint lines -->
+        <line x1="55" y1="80" x2="145" y2="80" stroke="white" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="55" y1="220" x2="145" y2="220" stroke="white" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <!-- Fracture line on radius -->
+        <path d="M58 155 L90 148 L88 162" stroke="#00e5c3" stroke-width="2" stroke-linecap="round"/>
+        <!-- Scan rect -->
+        <rect x="40" y="130" width="120" height="60" rx="4"
+              fill="none" stroke="#00e5c3" stroke-width="1" stroke-dasharray="5 3" opacity="0.7"/>
+        <!-- Corner markers -->
+        <path d="M40 145 L40 130 L55 130" stroke="#00e5c3" stroke-width="2" stroke-linecap="round"/>
+        <path d="M145 145 L145 130 L130 130" stroke="#00e5c3" stroke-width="2" stroke-linecap="round"/>
+        <path d="M40 175 L40 190 L55 190" stroke="#00e5c3" stroke-width="2" stroke-linecap="round"/>
+        <path d="M145 175 L145 190 L130 190" stroke="#00e5c3" stroke-width="2" stroke-linecap="round"/>
+        <!-- Detection label -->
+        <rect x="80" y="122" width="64" height="14" rx="3" fill="#00e5c3" opacity="0.9"/>
+        <text x="112" y="132" text-anchor="middle" font-size="8" fill="#001a16" font-family="monospace" font-weight="bold">FRACTURE 0.98</text>
+      </svg>
+    </div>
+ 
+    <div class="left-brand">
+      <div class="left-brand-icon">🦴</div>
+      <div>
+        <div class="left-brand-name">OsteoScan AI</div>
+        <span class="left-brand-tag">Fracture Intelligence</span>
+      </div>
+    </div>
+ 
+    <div class="left-footer">
+      <div class="left-tagline">
+        Detect.<br/>
+        Classify.<br/>
+        <em>Diagnose.</em>
+      </div>
+      <p class="left-desc">
+        AI-powered bone fracture detection and classification from X-ray images using YOLOv8m deep learning.
+      </p>
+    </div>
+  </div>
+ 
+  <!-- ── Right form panel ── -->
+  <div class="right">
+    <div class="form-wrap">
+ 
+      <div class="form-head">
+        <div class="form-eyebrow">Secure access</div>
+        <div class="form-title">Welcome back,<br/>Doctor.</div>
+        <div class="form-sub">Sign in to access the detection system</div>
+      </div>
+ 
+      <div class="field">
+        <label class="field-lbl" for="username">Username</label>
+        <div class="field-inp-wrap">
+          <span class="field-icon">👤</span>
+          <input class="field-inp" id="username" type="text"
+                 placeholder="Enter your username" autocomplete="username"/>
+        </div>
+      </div>
+ 
+      <div class="field">
+        <label class="field-lbl" for="password">Password</label>
+        <div class="field-inp-wrap">
+          <span class="field-icon">🔒</span>
+          <input class="field-inp" id="password" type="password"
+                 placeholder="Enter your password" autocomplete="current-password"/>
+          <button class="pwd-toggle" type="button" onclick="togglePwd()" id="pwdToggle" aria-label="Toggle password visibility">👁</button>
+        </div>
+      </div>
+ 
+      <div class="error-msg" id="errorMsg">
+        ⚠️ <span id="errorText">Invalid username or password.</span>
+      </div>
+ 
+      <button class="login-btn" onclick="doLogin()" id="loginBtn">
+        <span id="btnContent">Sign in →</span>
+      </button>
+ 
+      <div class="form-foot">
+        <span class="status-dot"></span>
+        OsteoScan AI · YOLOv8m · Research &amp; clinical assistance only
+      </div>
+ 
+    </div>
+  </div>
+ 
+  <script>
+    if (sessionStorage.getItem('osteo_user')) window.location.href = 'home.html';
+ 
+    const USERS = { admin: 'admin123', doctor: 'doc123', user: 'user123' };
+ 
+    function togglePwd() {
+      const inp = document.getElementById('password');
+      const btn = document.getElementById('pwdToggle');
+      if (inp.type === 'password') { inp.type = 'text';     btn.textContent = '🙈'; }
+      else                         { inp.type = 'password'; btn.textContent = '👁'; }
+    }
+ 
+    function doLogin() {
+      const u   = document.getElementById('username').value.trim();
+      const p   = document.getElementById('password').value;
+      const err = document.getElementById('errorMsg');
+      const txt = document.getElementById('errorText');
+      const btn = document.getElementById('loginBtn');
+      const cnt = document.getElementById('btnContent');
+ 
+      if (!u || !p) {
+        txt.textContent = 'Please enter both username and password.';
+        err.style.display = 'flex'; return;
+      }
+ 
+      // Loading state
+      btn.disabled = true;
+      cnt.innerHTML = '<div class="spinner"></div> Signing in...';
+ 
+      setTimeout(() => {
+        if (USERS[u] && USERS[u] === p) {
+          sessionStorage.setItem('osteo_user', u);
+          cnt.innerHTML = '✓ Redirecting...';
+          setTimeout(() => window.location.href = 'home.html', 400);
+        } else {
+          txt.textContent = 'Invalid username or password. Please try again.';
+          err.style.display = 'flex';
+          document.getElementById('password').value = '';
+          document.getElementById('password').focus();
+          btn.disabled = false;
+          cnt.innerHTML = 'Sign in →';
+        }
+      }, 700);
+    }
+ 
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('username').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('password').focus(); });
+    ['username','password'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        document.getElementById('errorMsg').style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>
+ 

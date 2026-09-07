@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OsteoScan AI — Fracture Intelligence</title>
+  <meta name="description" content="OsteoScan AI uses YOLOv8m neural networks for clinical-grade bone fracture detection with 92.9% accuracy."/>
+ 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+ 
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css"/>
+ 
+  <style>
+    /* ── Home-page overrides (mobile-first layout matching screen.png) ── */
+    body {
+      background: #111416;
+      color: #e2e2e5;
+      font-family: 'Inter', sans-serif;
+      min-height: 100dvh;
+      padding-bottom: 90px; /* room for bottom nav */
+    }
+ 
+    /* ── Top App Bar ── */
+    .home-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: #111416;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .home-header .header-left { display: flex; align-items: center; gap: 12px; }
+    .home-header .menu-icon { font-size: 24px; color: #57f1db; cursor: pointer; user-select: none; }
+    .home-header .brand {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      color: #57f1db;
+      letter-spacing: -0.5px;
+    }
+    .home-header .avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      background: #1a4f47;
+      font-size: 14px; font-weight: 700;
+      color: #57f1db;
+      cursor: pointer;
+    }
+ 
+    /* ── Main scroll area ── */
+    .home-main {
+      padding: 88px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+ 
+    /* ── Hero ── */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(26,79,71,0.35);
+      border: 1px solid rgba(87,241,219,0.2);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #57f1db;
+      margin-bottom: 10px;
+    }
+    .hero-title {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: clamp(32px, 8vw, 48px);
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    .hero-title .accent {
+      color: #57f1db;
+      text-shadow: 0 0 18px rgba(87,241,219,0.35);
+    }
+    .hero-sub {
+      font-size: 14px;
+      color: #bacac5;
+      line-height: 1.7;
+      max-width: 88%;
+    }
+ 
+    /* ── Stat Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .stat-full { grid-column: 1 / -1; }
+ 
+    .stat-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-card.center { align-items: center; text-align: center; }
+    .stat-card .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #bacac5;
+    }
+    .stat-card .stat-value {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 36px;
+      color: #57f1db;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .stat-card .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 24px;
+      color: #57f1db;
+      margin-bottom: 6px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .stat-card .stat-sub {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bacac5;
+    }
+    .accuracy-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #333537;
+      border-radius: 999px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .accuracy-bar-fill {
+      height: 100%;
+      width: 92.9%;
+      background: #57f1db;
+      border-radius: 999px;
+      box-shadow: 0 0 10px rgba(87,241,219,0.55);
+    }
+ 
+    /* ── 3D Skeleton Card ── */
+    .skeleton-card {
+      background: #1e2022;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .skeleton-card-header {
+      padding: 20px 20px 0;
+    }
+    .skeleton-card-header h3 {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: #e2e2e5;
+      margin-bottom: 4px;
+    }
+    .skeleton-card-header p {
+      font-size: 12px;
+      color: #bacac5;
+      line-height: 1.5;
+    }
+    .skeleton-embed-wrap {
+      position: relative;
+      margin-top: 16px;
+    }
+    .sketchfab-embed-wrapper {
+      width: 100%;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .sketchfab-embed-wrapper iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+      display: block;
+    }
+    .sketchfab-embed-wrapper p { display: none; }
+    .skeleton-3d-badge {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(87,241,219,0.1);
+      border: 1px solid rgba(87,241,219,0.22);
+      border-radius: 10px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+    .skeleton-3d-badge .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 18px;
+      color: #57f1db;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── CTA Card ── */
+    .cta-card {
+      background: #282a2c;
+      border: 1px solid rgba(87,241,219,0.1);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      top: -48px; right: -48px;
+      width: 120px; height: 120px;
+      background: rgba(87,241,219,0.06);
+      border-radius: 50%;
+      filter: blur(30px);
+      pointer-events: none;
+    }
+    .cta-card h3 {
+      font-family: 'Manrope', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: #e2e2e5;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-card p {
+      font-size: 13px;
+      color: #bacac5;
+      line-height: 1.65;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #57f1db 0%, #2dd4bf 100%);
+      color: #003731;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(87,241,219,0.2);
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 12px 28px rgba(87,241,219,0.28); }
+    .cta-btn:active { transform: scale(0.97); }
+    .cta-btn .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 20px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+ 
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 16px 18px;
+      background: rgba(17,20,22,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+    }
+    .nav-item.active {
+      background: rgba(87,241,219,0.1);
+      color: #57f1db;
+    }
+    .nav-item:not(.active) { color: #6b7280; }
+    .nav-item:not(.active):hover { color: #57f1db; }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-item .mat-icon {
+      font-family: 'Material Symbols Outlined';
+      font-size: 22px;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-item.active .mat-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+ 
+    /* ── Logout button (top-right corner hidden, accessible via avatar menu) ── */
+    .logout-btn {
+      background: none;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      margin-left: 8px;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.1); }
+ 
+    /* ── Responsive tweaks ── */
+    @media (min-width: 480px) {
+      .sketchfab-embed-wrapper iframe { height: 480px; }
+    }
+    @media (min-width: 700px) {
+      .home-main { padding-top: 96px; }
+      .sketchfab-embed-wrapper iframe { height: 550px; }
+    }
+  </style>
+</head>
+<body>
+ 
+  <!-- ── Top App Bar ── -->
+  <header class="home-header">
+    <div class="header-left">
+      <span class="material-symbols-outlined menu-icon">menu</span>
+      <span class="brand">OsteoScan AI</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="logout-btn" onclick="logout()" id="logoutBtn">Logout</button>
+      <div class="avatar" id="avatarBadge" title="Logged in user">D</div>
+    </div>
+  </header>
+ 
+  <!-- ── Main Content ── -->
+  <main class="home-main">
+ 
+    <!-- Hero -->
+    <section>
+      <div class="hero-badge">Advanced Diagnostics</div>
+      <h1 class="hero-title">
+        Fracture <span class="accent">Intelligence</span>
+      </h1>
+      <p class="hero-sub">
+        Harnessing YOLOv8m neural networks for clinical-grade bone pathology detection.
+      </p>
+    </section>
+ 
+    <!-- Stats Bento Grid -->
+    <section class="stats-grid" aria-label="Model statistics">
+ 
+      <!-- Accuracy — full width -->
+      <div class="stat-card center stat-full">
+        <span class="stat-label">Detection Model</span>
+        <span class="stat-value" style="font: size 28px;">YOLOv8m</span>
+      </div>
+ 
+ 
+      <!-- Training Images -->
+      <div class="stat-card">
+        <span class="mat-icon">database</span>
+        <span class="stat-value" style="font-size:24px;">12000+</span>
+        <span class="stat-sub">Training Images</span>
+      </div>
+ 
+      <!-- Detection Model -->
+      <div class="stat-card">
+        <span class="stat-label">Model Accuracy</span>
+        <span class="stat-value" style="font-size:24px;">95.4%</span>
+        <div class="accuracy-bar-track">
+          <div class="accuracy-bar-fill"></div>
+        </div>
+      </div>
+ 
+    </section>
+ 
+    <!-- Interactive 3D Skeleton -->
+    <section class="skeleton-card" aria-label="Interactive 3D skeleton model">
+      <div class="skeleton-card-header">
+        <h3>Interactive 3D Skeleton</h3>
+        <p>Rotate 360° by clicking and dragging. Explore bone structure before uploading your X-ray.</p>
+      </div>
+      <div class="skeleton-embed-wrap">
+        <div class="sketchfab-embed-wrapper">
+          <iframe
+            title="Male Skeleton"
+            frameborder="0"
+            allowfullscreen
+            mozallowfullscreen="true"
+            webkitallowfullscreen="true"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            xr-spatial-tracking
+            execution-while-out-of-viewport
+            execution-while-not-rendered
+            web-share
+            src="https://sketchfab.com/models/11b57ebfcf6c4e3b88d0cbe618ee70a7/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0">
+          </iframe>
+        </div>
+        <div class="skeleton-3d-badge">
+          <span class="mat-icon">3d_rotation</span>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- CTA -->
+    <section class="cta-card" aria-label="Upload X-ray for fracture detection">
+      <h3>Ready to Detect Fractures?</h3>
+      <p>Upload high-resolution DICOM or JPEG X-rays for instant AI analysis with 92.9% accuracy.</p>
+      <a href="detect.html" class="cta-btn" id="uploadBtn">
+        Upload X-ray &amp; Detect
+        <span class="mat-icon">arrow_forward</span>
+      </a>
+    </section>
+ 
+  </main>
+ 
+  <!-- ── Bottom Navigation ── -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <a href="home.html" class="nav-item active" id="navHome">
+      <span class="mat-icon">home</span>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="overview.html" class="nav-item" id="navOverview">
+      <span class="mat-icon">bar_chart</span>
+      <span class="nav-label">Overview</span>
+    </a>
+    <a href="history.html" class="nav-item" id="navHistory">
+      <span class="mat-icon">history</span>
+      <span class="nav-label">History</span>
+    </a>
+    <a href="settings.html" class="nav-item" id="navSettings">
+      <span class="mat-icon">settings</span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+ 
+  <script>
+    // Auth guard
+    const user = sessionStorage.getItem('osteo_user');
+    if (!user) window.location.href = 'login.html';
+ 
+    // Update avatar & display name
+    const displayName = user ? user.charAt(0).toUpperCase() + user.slice(1) : 'Doctor';
+    document.getElementById('avatarBadge').textContent = displayName.charAt(0).toUpperCase();
+    document.title = `OsteoScan AI — Welcome, ${displayName}`;
+ 
+    function logout() {
+      sessionStorage.removeItem('osteo_user');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
